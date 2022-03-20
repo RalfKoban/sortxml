@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
 namespace MiKoSolutions.SortXml.Sorters
 {
-    internal static class CSharpProjectSorter
+    internal static class ProjectSorter
     {
         internal static void Sort(string inputFileName, string outputFileName)
         {
@@ -15,7 +16,7 @@ namespace MiKoSolutions.SortXml.Sorters
             xDocument.Declaration = new XDeclaration("1.0", "utf-8", null);
 
             var itemGroups = xDocument.Descendants().Where(_ => _.Name.LocalName == "ItemGroup");
-            foreach (var itemGroup in itemGroups)
+            foreach (var itemGroup in itemGroups.Where(_ => _.HasElements))
             {
                 var elements = itemGroup.Elements()
                                         .OrderBy(_ => _.Name.LocalName)
@@ -57,7 +58,40 @@ namespace MiKoSolutions.SortXml.Sorters
                 doc.LoadXml(xml);
             }
 
+            File.SetAttributes(outputFileName, FileAttributes.Normal);
+
             doc.Save(outputFileName);
+        }
+
+        internal static void FindItemGroupIssues(string inputFileName, string outputFileName)
+        {
+            var xDocument = XDocument.Load(inputFileName, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+
+            // ensure that we have UTF-8 encoding
+            xDocument.Declaration = new XDeclaration("1.0", "utf-8", null);
+
+            var issue = false;
+
+            var itemGroups = xDocument.Descendants().Where(_ => _.Name.LocalName == "ItemGroup");
+            foreach (var itemGroup in itemGroups.Where(_ => _.HasElements))
+            {
+                var elements = itemGroup.Elements().ToList();
+                var expectedName = elements.First().Name.LocalName;
+
+                foreach (var element in elements)
+                {
+                    var localName = element.Name.LocalName;
+                    if (localName != expectedName)
+                    {
+                        issue = true;
+                    }
+                }
+            }
+
+            if (issue)
+            {
+                Trace.WriteLine(inputFileName, "RKN Semantic");
+            }
         }
     }
 }

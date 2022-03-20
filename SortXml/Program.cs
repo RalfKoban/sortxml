@@ -1,4 +1,7 @@
-﻿using MiKoSolutions.SortXml.Sorters;
+﻿using System;
+using System.IO;
+
+using MiKoSolutions.SortXml.Sorters;
 
 namespace MiKoSolutions.SortXml
 {
@@ -7,19 +10,29 @@ namespace MiKoSolutions.SortXml
         static void Main(string[] args)
         {
             if (args.Length == 0)
+            {
                 return;
+            }
 
             var inputFileName = args[0];
             var outputFileName = args[args.Length -1];
 
-            if (inputFileName.EndsWith(".csproj"))
+            var fileInfo = new FileInfo(inputFileName);
+            var fileExtension = fileInfo.Extension;
+
+            if (fileExtension.IndexOf("proj", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                CSharpProjectSorter.Sort(inputFileName, outputFileName);
+                ProjectSorter.Sort(inputFileName, outputFileName);
+                return;
             }
-            else
+
+            if (fileInfo.Name.Equals("packages.config", StringComparison.OrdinalIgnoreCase))
             {
-                AttributesSorter.Sort(inputFileName, outputFileName);
+                PackagesConfigSorter.Sort(inputFileName, outputFileName);
+                return;
             }
+
+            AttributesSorter.Sort(inputFileName, outputFileName);
         }
     }
 }

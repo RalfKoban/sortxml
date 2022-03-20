@@ -43,7 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sorters\AttributesSorter.cs" />
-    <Compile Include="Sorters\CSharpProjectSorter.cs" />
+    <Compile Include="Sorters\PackagesConfigSorter.cs" />
+    <Compile Include="Sorters\ProjectSorter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sorters\Utf8StringWriter.cs" />
